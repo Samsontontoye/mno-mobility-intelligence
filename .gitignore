@@ -1,0 +1,71 @@
+
+# Python environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+
+# Environment variables and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets/
+
+# Raw MNO datasets
+data/raw/
+
+# Intermediate and processed subscriber-level data
+data/interim/
+data/processed/
+
+# Synthetic source datasets and generated records
+data/synthetic/*.csv
+data/synthetic/*.parquet
+
+# Keep directory placeholders
+!data/raw/.gitkeep
+!data/interim/.gitkeep
+!data/processed/.gitkeep
+!data/synthetic/.gitkeep
+
+# Generated analytical reports and subscriber-level outputs
+reports/*.csv
+
+# macOS
+.DS_Store
+
+# Large datasets
+*.parquet
+*.feather
+*.h5
+*.hdf5
+
+# Temporary files
+.DS_Store
+*.log
+*.tmp
+
+# IDE settings
+.vscode/
+.idea/
+
+# Model artefacts
+models/
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.h5
+
+# Temporary exports
+exports/
+output/
+outputs/

@@ -1,0 +1,38 @@
+
+project:
+  name: "MNO Mobility Intelligence"
+  version: "1.0.0"
+  timezone: "Africa/Nairobi"
+
+data:
+  raw_path: "data/raw"
+  interim_path: "data/interim"
+  processed_path: "data/processed"
+
+  core_file: "MPD_sample_synthetic_ken_3000subs.csv"
+  extended_file: "MPD_sample_synthetic_ken_3000subs_full.csv"
+
+columns:
+  subscriber_id: "msisdn"
+  timestamp: "datetime"
+  cell_id: "cell_id"
+  latitude: "latitude"
+  longitude: "longitude"
+
+residence:
+  night_start: 20
+  night_end: 6
+  minimum_observed_nights: 5
+  minimum_dominance: 0.40
+  minimum_coverage: 0.20
+
+displacement:
+  minimum_distance_km: 5.0
+  minimum_post_event_share: 0.50
+  baseline_days: 10
+  post_event_days: 10
+  minimum_period_nights: 3
+
+privacy:
+  minimum_aggregation_group_size: 5
+  export_subscriber_level_data: false

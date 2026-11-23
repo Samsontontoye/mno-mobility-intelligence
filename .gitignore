@@ -5,6 +5,7 @@ venv/
 env/
 __pycache__/
 *.py[cod]
+*.egg-info/
 
 # Jupyter temporary files
 .ipynb_checkpoints/
@@ -20,11 +21,11 @@ credentials.json
 secrets/
 
 # Raw MNO datasets
-data/raw/
+data/raw/*
 
 # Intermediate and processed subscriber-level data
-data/interim/
-data/processed/
+data/interim/*
+data/processed/*
 
 # Synthetic source datasets and generated records
 data/synthetic/*.csv
@@ -38,6 +39,9 @@ data/synthetic/*.parquet
 
 # Generated analytical reports and subscriber-level outputs
 reports/*.csv
+reports/*.parquet
+reports/*.xlsx
+reports/*.json
 
 # macOS
 .DS_Store

@@ -1,761 +1,785 @@
-# MNO Mobility Intelligence: Residential Location Inference, Population Displacement Detection and Poverty Estimation
+# MNO Mobility Intelligence: Residential Location Inference, Population Displacement Detection & Privacy-Preserving Analytics
+
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Pandas](https://img.shields.io/badge/Pandas-Data%20Analysis-150458)
+![GeoPandas](https://img.shields.io/badge/GeoPandas-Geospatial-139C5A)
+![Scikit Learn](https://img.shields.io/badge/Scikit--Learn-Machine%20Learning-F7931E)
+![SQLite](https://img.shields.io/badge/SQLite-Database-003B57)
+![Status](https://img.shields.io/badge/Project-Research%20%26%20Prototype-orange)
+![Data](https://img.shields.io/badge/Data-Synthetic-lightgrey)
 
 ## 1. Project Overview
 
-**MNO Mobility Intelligence** is an independent data science and machine learning project exploring how anonymised Mobile Network Operator (MNO) data can be transformed into useful geospatial and population-level insights for humanitarian response, development research and evidence-based intervention planning.
+The **MNO Mobility Intelligence Project** is an end-to-end geospatial and spatio-temporal analytics project designed to investigate how Mobile Network Operator (MNO) records can be used to infer residential locations, estimate geographic presence, identify potential population displacement patterns, and explore the relationship between mobile network activity and socioeconomic conditions.
 
-The project investigates how Call Detail Records (CDR) and Internet Protocol Detail Records (IPDR) can be used to:
+The project uses synthetic Call Detail Record (CDR) and Internet Protocol Detail Record (IPDR) data to develop and evaluate analytical methods that could potentially be adapted to real-world MNO environments.
 
-- Infer subscribers' likely residential locations from observed mobile network activity.
-- Classify recurring nighttime presence and distinguish stable residential patterns from uncertain observations.
-- Identify potential population movement and relocation-like patterns.
-- Analyse geographic population presence, activity concentration and origin–destination movements.
-- Investigate how aggregated MNO mobility indicators could complement household survey data in poverty estimation.
-- Evaluate model robustness, temporal consistency, parameter sensitivity and uncertainty where independently verified ground truth is limited.
-- Develop privacy-conscious, reproducible analytical workflows that could inform future MNO data partnerships.
+The central analytical question is:
 
-The project is designed around a practical challenge in mobile network analytics: mobile network records are generated for communication and network operations, not specifically for understanding residential behaviour or population movement.
+**Can mobile network activity provide sufficient evidence to estimate where subscribers reside, whether they are present in a particular geographic area over a defined period, and whether their mobility patterns suggest a change in residence?**
 
-Consequently, MNO data are incomplete observations of human activity. A subscriber's most frequently observed location is not necessarily their home, an absence of network activity does not necessarily mean that a person has moved, and a change in nighttime activity does not automatically indicate displacement.
+This question has important applications in:
 
-The project therefore focuses on transparent assumptions, spatial and temporal analysis, uncertainty assessment and careful interpretation of analytical outputs.
+- Humanitarian programme targeting.
+- Population mobility and displacement monitoring.
+- Geographic presence estimation.
+- Emergency response planning.
+- Poverty estimation and socioeconomic research.
+- Evidence-based intervention design.
+- Privacy-conscious population analytics.
 
-**Project status:** Independent portfolio project. Not an operational MNO deployment.
+The project progresses from exploratory data analysis and residential location inference to displacement detection, methodological validation, poverty estimation, operator-side implementation, and privacy-preserving analytics.
 
-**Geographic focus:** Kenya, using synthetic data.
+It consists of eight Jupyter notebooks, each addressing a distinct analytical or implementation component.
 
-**Primary technologies:** Python, Pandas, NumPy, Scikit-learn, GeoPandas, Matplotlib, Seaborn and geospatial analysis tools.
+### Project objectives
 
----
+The primary objectives are to:
 
-## 2. Project Objectives
-
-The project has six primary objectives.
-
-### 2.1 Residential Location Inference
-
-Develop a reproducible approach for estimating a subscriber's likely residential location using recurring nighttime mobile network observations.
-
-The methodology considers:
-
-- Nighttime activity patterns.
-- Frequency and consistency of observations.
-- Spatial clustering of observed network activity.
-- Cell tower coordinate quality.
-- Minimum observation requirements.
-- Alternative candidate locations.
-- Confidence and uncertainty indicators.
-
-### 2.2 Residence Classification
-
-Classify inferred residential patterns according to the strength and consistency of observed evidence.
-
-The classification distinguishes likely stable residential patterns from recurring but insufficiently established nighttime presence, weak evidence and cases where no reliable estimate can be produced.
-
-### 2.3 Population Displacement Detection
-
-Investigate potential movement by comparing subscriber activity across baseline and follow-up periods.
-
-The analysis explores:
-
-- Changes in dominant nighttime locations.
-- Geographic distance between baseline and follow-up locations.
-- Persistent activity in alternative locations.
-- Potential relocation-like patterns.
-- Temporary movement versus potentially persistent changes.
-- Aggregate geographic inflows and outflows.
-
-These outputs are exploratory movement indicators, not verified records of forced displacement.
-
-### 2.4 Validation and Methodological Robustness
-
-Evaluate how sensitive residential and movement estimates are to analytical assumptions.
-
-This includes:
-
-- Temporal holdout evaluation.
-- Nighttime-window sensitivity.
-- Minimum-observation thresholds.
-- Dominant-location thresholds.
-- Spatial clustering parameters.
-- Method disagreement.
-- Confidence-score diagnostics.
-- Grid alignment sensitivity.
-- No-ground-truth validation strategies.
-
-### 2.5 Poverty Estimation and Survey Integration
-
-Investigate whether aggregated MNO activity features could provide useful geographic information when combined with household survey indicators.
-
-The project explores:
-
-- Geographic aggregation of MNO features.
-- Integration with household survey data.
-- Geographic coverage and representativeness.
-- Poverty classification.
-- Household consumption estimation.
-- Geographic train/test separation.
-- Baseline comparisons and feature importance.
-
-The current implementation uses synthetic survey data to test the analytical workflow. It does not establish a real-world relationship between MNO activity and household poverty.
-
-### 2.6 Privacy-Conscious Analytical Design
-
-Establish analytical practices that minimise unnecessary exposure of subscriber-level information.
-
-These include:
-
-- Pseudonymous subscriber identifiers.
-- Geographic and temporal aggregation.
-- Small-group suppression.
-- Avoiding publication of subscriber-level mobility records.
-- Avoiding publication of exact inferred residential coordinates.
-- Separating analytical reference labels from inference features.
-- Considering privacy-preserving computation methods in future extensions.
+1. Assess the quality, coverage and analytical suitability of MNO mobility records.
+2. Develop methods for inferring subscriber residential locations using temporal and spatial activity patterns.
+3. Classify subscribers based on the strength and consistency of residential evidence.
+4. Estimate geographic presence across administrative and target areas.
+5. Investigate potential population displacement through changes in subscriber mobility patterns.
+6. Evaluate methodological robustness under sparse observations and limited ground truth.
+7. Explore the integration of aggregated MNO activity features with household survey data for poverty estimation.
+8. Develop scalable data processing workflows that could be adapted to operator infrastructure.
+9. Demonstrate privacy-conscious approaches to MNO data processing and geographic analytics.
+10. Document the assumptions, limitations, implementation considerations and privacy risks associated with mobility-based inference.
 
 ---
 
-## 3. Dataset Description
+## 2. Dataset Description
 
-### 3.1 Data Source
+### 2.1 Dataset overview
 
-The project uses a synthetic Kenyan MNO dataset generated for analytical experimentation.
+The project uses a synthetic Kenya-based MNO mobility dataset containing approximately:
 
-Two principal files are available:
+| Dataset characteristic | Description |
+|---|---:|
+| Total records | 1,072,608 |
+| Unique subscribers | 3,000 |
+| Unique cell IDs | 35,956 |
+| Observation period | 1–28 February 2026 |
+| CDR records | Approximately 94.14% |
+| IPDR records | Approximately 5.86% |
+| Geographic coverage | Synthetic Kenya-based coordinates |
 
-| Dataset | Description |
-|---|---|
-| `MPD_sample_synthetic_ken_3000subs.csv` | Synthetic MNO sample dataset |
-| `MPD_sample_synthetic_ken_3000subs_full.csv` | Full synthetic MNO dataset |
+The dataset contains simulated subscriber activity and geographic observations over a 28-day period.
 
-The full dataset contains approximately:
+**Important:** This is synthetic data. It is not obtained from a real mobile network operator, does not represent actual subscriber behaviour, and must not be interpreted as evidence about the real population distribution or mobility patterns of Kenya.
 
-- **1,072,608 records**
-- **3,000 unique subscribers**
-- **35,956 unique cell IDs**
-- **28 days of observations**
-- **Observation period:** 1–28 February 2026
-- **CDR records:** Approximately 94.14%
-- **IPDR records:** Approximately 5.86%
+### 2.2 Dataset files
 
-### 3.2 Dataset Schema
+The project uses two principal input files:
+
+- `MPD_sample_synthetic_ken_3000subs.csv`
+- `MPD_sample_synthetic_ken_3000subs_full.csv`
+
+The full dataset is used for the main analytical workflows.
+
+### 2.3 Dataset schema
 
 The dataset contains the following fields:
 
 | Field | Description |
 |---|---|
-| `msisdn` | Subscriber identifier |
-| `datetime` | Date and time of the network event |
-| `cell_id` | Mobile network cell identifier |
-| `latitude` | Latitude associated with the cell observation |
-| `longitude` | Longitude associated with the cell observation |
+| `msisdn` | Synthetic subscriber identifier |
+| `datetime` | Timestamp associated with the network activity |
+| `cell_id` | Cell identifier associated with the event |
+| `latitude` | Geographic latitude of the associated cell |
+| `longitude` | Geographic longitude of the associated cell |
 | `data_type` | Type of network record, such as CDR or IPDR |
-| `service` | Network service associated with the record |
-| `location_target` | Synthetic reference label associated with location |
-| `location_place` | Synthetic location description |
+| `service` | Recorded service or event category |
+| `location_target` | Simulator-generated location reference |
+| `location_place` | Simulator-generated place category |
 | `movement_dist` | Simulator-generated movement distance |
 | `movement_speed` | Simulator-generated movement speed |
-| `is_robot` | Synthetic subscriber classification indicator |
-| `profile` | Synthetic subscriber profile |
-| `tourist` | Synthetic tourist indicator |
-| `record_profile` | Synthetic record classification |
-| `movement_profile` | Synthetic movement classification |
+| `is_robot` | Simulator-generated classification |
+| `profile` | Simulator-generated subscriber profile |
+| `tourist` | Simulator-generated tourist classification |
+| `record_profile` | Simulator-generated record classification |
+| `movement_profile` | Simulator-generated movement classification |
 
-### 3.3 Important Data Leakage Consideration
+### 2.4 Prevention of target leakage
 
-Several columns are generated by the simulator and must not be used as model inputs when attempting to infer residential locations or movement patterns.
+An important methodological consideration is separating observed network information from simulator-generated labels.
 
-These include:
+The following fields are not used as predictive or inference features:
 
 - `location_target`
 - `location_place`
 - `movement_dist`
 - `movement_speed`
+- `is_robot`
 - `profile`
+- `tourist`
 - `record_profile`
 - `movement_profile`
 
-Where appropriate, `location_target` may be used as a synthetic reference label for evaluation, but never as an inference feature.
+These fields contain information generated by the synthetic data simulator and could introduce target leakage if used to infer residential locations or subscriber movement.
 
-This separation is important because using simulator-generated labels as model inputs would introduce target leakage and produce misleading evaluation results.
+Where appropriate, `location_target` may be used as a synthetic reference for evaluation. It is not treated as independently verified ground truth.
 
-### 3.4 Data Limitations
-
-The dataset is synthetic and does not represent actual Kenyan mobile network subscribers.
-
-Its limitations include:
-
-- Artificially generated subscriber behaviour.
-- Potentially unrealistic communication patterns.
-- Simulated cell tower distributions and coordinates.
-- Limited observation period.
-- No independently collected residential ground truth.
-- No verified displacement labels.
-- No real household poverty measurements linked to subscribers.
-- Potential sampling and geographic coverage biases.
-
-Results should therefore be interpreted as demonstrations of analytical methods and workflows rather than evidence of real-world predictive performance.
+This separation helps ensure that the inference process relies on the observable network activity rather than information that would not necessarily be available in an actual operator dataset.
 
 ---
 
-## 4. Project Architecture and Repository Structure
+# 3. Project Architecture and Notebook Structure
 
-The project is organised into notebooks, data directories, reusable source code, documentation, reports, SQL and testing components.
+The project is organised into eight analytical notebooks.
 
-```text
-mno-mobility-intelligence/
-│
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── .gitignore
-│
-├── config/
-│   └──
-│
-├── data/
-│   ├── raw/
-│   ├── interim/
-│   ├── processed/
-│   ├── external/
-│   └── synthetic/
-│
-├── notebooks/
-│   ├── 01_data_exploration_and_quality.ipynb
-│   ├── 02_home_location_inference.ipynb
-│   ├── 03_residence_classification.ipynb
-│   ├── 04_population_displacement_detection.ipynb
-│   ├── 05_validation_and_sensitivity_analysis.ipynb
-│   └── 06_poverty_estimation_and_survey_integration.ipynb
-│
-├── src/
-│   ├──
-│
-├── sql/
-│   └──
-│
-├── dashboard/
-│   └──
-│
-├── reports/
-│   └──
-│
-├── docs/
-│   └──
-│
-└── tests/
-    └──
-```
+| Notebook | Name | Main objective |
+|---|---|---|
+| 01 | MNO Data Exploration and Quality Assessment | Understand the data, coverage and limitations |
+| 02 | Residential Location Inference | Infer likely subscriber residential locations |
+| 03 | Residence Classification and Geographic Presence Estimation | Classify residential evidence and estimate geographic presence |
+| 04 | Population Displacement Detection | Identify potential changes in residential location and mobility patterns |
+| 05 | Validation, Sensitivity Analysis and Methodological Robustness | Evaluate inference reliability and parameter sensitivity |
+| 06 | Poverty Estimation and Survey Data Integration | Explore geographic MNO features and household survey integration |
+| 07 | Scalability and Operator Implementation | Demonstrate operator-oriented processing and implementation workflows |
+| 08 | Privacy-Preserving MNO Analytics | Explore privacy-conscious processing and privacy-enhancing technologies |
 
-The notebook sequence represents the analytical workflow. Some repository directories are reserved for future modularisation and implementation.
-
-### Data Directory
-
-| Directory | Purpose |
-|---|---|
-| `data/raw/` | Original source datasets |
-| `data/interim/` | Intermediate analytical datasets |
-| `data/processed/` | Processed outputs from notebooks |
-| `data/external/` | External geographic reference datasets |
-| `data/synthetic/` | Synthetic datasets used for experimentation |
-
-Raw, interim, processed and subscriber-level analytical outputs should not be committed to a public GitHub repository unless they have been explicitly reviewed and approved for publication.
+The notebooks are designed to build on one another, moving from data understanding to analytical inference, validation, operational considerations and privacy.
 
 ---
 
-## 5. Analytical Workflow
+# 4. Detailed Notebook Documentation
 
-The project is divided into six analytical notebooks.
+## Notebook 01 — MNO Data Exploration and Quality Assessment
 
-### Notebook 01: Data Exploration and MNO Data Quality Assessment
+**File:** `01_mno_data_exploration_and_quality_assessment.ipynb`
 
-**File:** `01_data_exploration_and_quality.ipynb`
+### Objective
 
-The first notebook establishes the quality, structure and characteristics of the MNO dataset before attempting residential or mobility inference.
+The first notebook establishes an understanding of the MNO dataset before any residential location inference is attempted.
 
-#### Key activities
+The purpose is to determine whether the available records contain sufficient temporal, geographic and subscriber-level information to support mobility analysis.
 
-1. Load and inspect the synthetic MNO dataset.
-2. Examine dataset dimensions and data types.
-3. Assess missing values and duplicate records.
-4. Validate timestamps and observation periods.
-5. Examine CDR and IPDR distributions.
-6. Analyse subscriber activity distribution.
-7. Assess cell ID frequency and geographic distribution.
-8. Investigate coordinate consistency for individual cell IDs.
-9. Explore temporal activity patterns.
-10. Examine geographic concentration and coverage.
+The analysis focuses on data quality, observation coverage, subscriber activity, temporal behaviour, geographic consistency and the limitations of the available observations.
 
-#### Key analytical questions
+### 4.1 Data loading and schema assessment
 
-- Are subscriber activity levels reasonably consistent, or is the dataset dominated by a relatively small group?
-- How many unique subscribers and cell IDs are represented?
-- Are cell IDs geographically consistent?
-- How concentrated is activity across geographic locations?
-- What proportion of records are CDR versus IPDR?
-- Are there temporal patterns that could support residential inference?
-- Are there data quality issues that could distort downstream analysis?
+The notebook loads the synthetic MNO dataset and performs initial structural checks.
 
-#### Outputs
+Activities include:
 
-The notebook establishes the data quality and coverage baseline used by subsequent analytical stages.
+- Loading the full CDR/IPDR dataset.
+- Inspecting dataset dimensions.
+- Reviewing column names and data types.
+- Identifying missing values.
+- Checking duplicate records.
+- Converting timestamps into appropriate datetime formats.
+- Identifying unique subscribers and cell IDs.
+- Reviewing the observation period.
+
+### 4.2 MNO record distribution
+
+The analysis examines the distribution of network record types.
+
+The dataset contains both:
+
+- Call Detail Records (CDR).
+- Internet Protocol Detail Records (IPDR).
+
+The analysis investigates the relative contribution of each record type and considers how different event types may affect the interpretation of subscriber activity.
+
+### 4.3 Subscriber activity analysis
+
+Subscriber-level activity is examined to determine whether observations are distributed consistently or dominated by a smaller group of highly active subscribers.
+
+The analysis includes:
+
+- Events per subscriber.
+- Distribution of subscriber activity.
+- Active days per subscriber.
+- Subscriber observation coverage.
+- Variability in subscriber activity.
+- Identification of low-activity and high-activity subscribers.
+
+This is important because residential location inference can become unreliable when some subscribers have substantially fewer observations than others.
+
+### 4.4 Temporal activity analysis
+
+The notebook investigates when subscribers generate network events.
+
+Activities include:
+
+- Hourly event distribution.
+- Daily event distribution.
+- Weekday versus weekend activity.
+- Daytime versus nighttime activity.
+- Temporal coverage across the observation period.
+
+These patterns help establish whether there is sufficient nighttime activity to support residential location inference.
+
+### 4.5 Geographic and cell-site analysis
+
+The geographic assessment examines cell ID distribution and coordinate consistency.
+
+Activities include:
+
+- Unique cell ID analysis.
+- Latitude and longitude validation.
+- Geographic coordinate distribution.
+- Cell-site observation frequency.
+- Geographic concentration of activity.
+- Identification of invalid or inconsistent coordinates.
+
+The analysis also considers the possibility that different records associated with the same cell ID may contain inconsistent coordinates.
+
+### 4.6 Data quality considerations
+
+The notebook identifies several issues that may affect subsequent inference:
+
+- Uneven subscriber activity.
+- Sparse observations.
+- Incomplete temporal coverage.
+- Geographic concentration.
+- Inconsistent cell coordinates.
+- Different record-generation frequencies.
+- Potential limitations in interpreting cell-level observations as precise subscriber locations.
+
+### Deliverables
+
+Notebook 01 establishes the data quality baseline and informs the analytical decisions made in subsequent notebooks.
+
+**Key outcome:** A structured understanding of the available MNO records and their suitability for residential location inference and mobility analysis.
 
 ---
 
-### Notebook 02: Home Location Inference
+## Notebook 02 — Residential Location Inference
 
 **File:** `02_home_location_inference.ipynb`
 
-This notebook develops the initial residential location inference methodology.
+### Objective
 
-The objective is to identify a subscriber's likely home area using recurring nighttime network activity.
+This notebook develops methods for estimating subscriber residential locations using recurring nighttime mobile network activity.
 
-#### Methodology
+The underlying assumption is that subscribers are more likely to generate recurring activity around their residential locations during nighttime periods than during daytime periods.
 
-**1. Subscriber classification**
+This is an inference assumption, not a guarantee that nighttime activity always represents a subscriber's home.
 
-Separate ordinary subscribers from synthetic categories such as tourists and robot-like subscribers where appropriate.
+### 4.7 Subscriber classification
 
-These classifications are used to establish the analytical population and are not treated as proof of actual human behaviour.
+The notebook begins by separating ordinary subscriber activity from other simulated activity categories.
 
-**2. Nighttime activity extraction**
+The intention is to reduce the influence of records that may not represent normal subscriber mobility.
 
-Extract observations within a nighttime window of:
+Simulator-generated fields are not used as inference features.
 
-- Start: 20:00
-- End: 06:00
+### 4.8 Nighttime activity filtering
 
-Observations occurring after midnight are assigned to the preceding nighttime period so that activity spanning midnight is treated as one night.
+A nighttime observation window is applied:
 
-**3. Coordinate quality assessment**
+- Start: 20:00.
+- End: 06:00.
 
-Evaluate the geographic consistency of cell observations.
+Because the observation window crosses midnight, records after midnight are assigned to the preceding nighttime observation period.
 
-Cell IDs with inconsistent or unreliable coordinates are identified and excluded or handled separately.
+This prevents one continuous nighttime period from being incorrectly treated as two unrelated calendar nights.
 
-**4. Candidate location aggregation**
+### 4.9 Residential candidate generation
 
-Aggregate recurring nighttime activity by subscriber and candidate cell location.
+For each subscriber, nighttime events are aggregated to identify candidate residential locations.
 
-Candidate locations are evaluated using measures such as:
+The analysis considers:
 
-- Observation frequency.
-- Number of distinct observed nights.
-- Recurrence across the observation period.
-- Weighted nighttime activity.
-- Geographic consistency.
+- Number of nighttime observations.
+- Frequency of visits to candidate locations.
+- Number of distinct nights with activity.
+- Consistency of recurring locations.
+- Geographic coordinates associated with the observations.
 
-**5. Spatial clustering**
+The purpose is to identify locations with recurring nighttime activity rather than simply selecting the most frequently observed cell.
 
-Apply DBSCAN using Haversine distance to group nearby nighttime cell observations.
+### 4.10 Spatial clustering using DBSCAN
 
-The initial experimental configuration includes:
+The notebook implements DBSCAN to group geographically nearby nighttime observations.
 
-| Parameter | Initial value |
+The clustering process uses geographic distance calculations based on the Haversine formula.
+
+The main configuration includes:
+
+| Parameter | Demonstration setting |
 |---|---:|
 | Clustering algorithm | DBSCAN |
 | Distance metric | Haversine |
 | Epsilon | 1 km |
 | Minimum samples | 2 |
-| Minimum observed nights | 3 |
+| Minimum nighttime observations | 3 nights |
 
-These values are experimental assumptions and are subsequently examined through sensitivity analysis.
+The clustering approach helps account for situations where nearby cell sites may represent the same general residential area.
 
-**6. Fallback inference**
+### 4.11 Alternative candidate aggregation
 
-Where spatial clustering does not produce a suitable result, use a dominant candidate-location aggregation approach as a fallback.
+DBSCAN may not produce a reliable residential cluster for every subscriber, particularly where observations are sparse.
 
-**7. Confidence assessment**
+An alternative aggregation method is therefore used to provide a fallback estimate where the clustering approach is insufficient.
 
-Produce confidence indicators using observed activity consistency and candidate-location evidence.
+This allows the methodology to retain useful candidate evidence without treating every subscriber as if they have a sufficiently dense spatial observation history.
 
-These scores are heuristic indicators and should not automatically be interpreted as calibrated probabilities.
+### 4.12 Residential location scoring
 
-**8. Synthetic reference evaluation**
+Candidate residential locations are assessed using evidence from recurring nighttime activity.
 
-Where available, compare inferred locations against synthetic reference labels.
+The scoring considers factors such as:
 
-The reference labels are used for evaluation only.
+- Frequency of observations.
+- Nighttime presence.
+- Number of distinct observation nights.
+- Consistency of activity.
+- Relative strength of competing candidate locations.
 
-#### Outputs
+The resulting scores are used to rank candidate locations and support confidence assessment.
 
-The notebook produces the following analytical files:
+### 4.13 Synthetic reference evaluation
 
-| Output | Description |
-|---|---|
-| `home_location_estimates.csv` | Inferred residential location estimates |
-| `subscriber_classification.csv` | Subscriber analytical classifications |
-| `nighttime_cell_candidates.csv` | Candidate nighttime locations |
-| `cell_coordinate_validation.csv` | Cell coordinate quality assessment |
+The inferred residential locations are compared with available simulator-generated reference labels.
 
-These are analytical outputs and should remain private when they contain subscriber-level information.
+This provides a way to examine the behaviour of the inference methodology under controlled synthetic conditions.
 
----
+However, these comparisons are not independent real-world validation.
 
-### Notebook 03: Residence Classification and Target-Area Presence Estimation
+### 4.14 Outputs
 
-**File:** `03_residence_classification.ipynb`
+The notebook generates intermediate outputs used in subsequent notebooks, including:
 
-This notebook extends home location inference by assessing the strength and consistency of residential evidence.
+- `home_location_estimates.csv`
+- `subscriber_classification.csv`
+- `nighttime_cell_candidates.csv`
+- `cell_coordinate_validation.csv`
 
-An inferred home location alone does not establish that a subscriber is a stable resident of a geographic area.
+These files contain analytical outputs and should remain local rather than being committed to a public repository.
 
-The notebook therefore separates residential location estimation from residence classification.
-
-#### Methodology
-
-1. Load inferred home locations and subscriber classifications.
-2. Evaluate nighttime presence consistency.
-3. Calculate observed activity across distinct calendar days.
-4. Assess the number of observed nights and recurring activity.
-5. Identify weak or insufficient residential evidence.
-6. Identify recurring alternative nighttime locations.
-7. Assign inferred coordinates to geographic administrative areas.
-8. Analyse subscriber presence across target geographic areas.
-9. Assess the distribution of estimates and uncertainty.
-
-#### Residence classification framework
-
-The analytical categories include:
-
-| Classification | Interpretation |
-|---|---|
-| Likely stable resident | Relatively strong and recurring nighttime residential evidence |
-| Recurring presence, not yet stable | Repeated activity without sufficient evidence to establish stable residence |
-| Uncertain weak home presence | Limited or inconsistent evidence |
-| Recurring alternative nighttime location | Evidence of another recurring nighttime location |
-| Uncertain insufficient home estimate | Insufficient evidence to generate a reliable residential estimate |
-
-A subscriber without an inferred home location must not automatically be classified as absent, displaced or living outside the study area.
-
-#### Geographic analysis
-
-The notebook uses administrative boundary data to associate inferred residential locations with geographic areas.
-
-The project uses Kenya's 47 county boundaries obtained from an external geographic reference dataset.
-
-The analysis examines geographic coverage and concentration.
-
-An observed concentration of inferred locations in Nairobi, for example, should be interpreted in the context of the synthetic dataset and its sampling and coverage characteristics. It must not be interpreted as an estimate of Kenya's actual population distribution.
-
-#### Illustrative analytical findings
-
-At one stage of the analysis:
-
-- Approximately 2,813 ordinary subscribers were retained.
-- Approximately 2,569 subscribers had inferred home locations.
-- This represented approximately 91.3% of the retained analytical population.
-- Approximately 2,073 estimates came from the clustering approach.
-- Approximately 496 estimates used the fallback method.
-- Approximately 244 subscribers had no inferred home location.
-
-These figures describe the synthetic dataset and the particular analytical configuration used at that stage. They are not population estimates.
-
-#### Outputs
-
-The notebook produces residence classification, geographic assignment and aggregate presence analyses for downstream use.
+**Key outcome:** A residential location inference workflow using nighttime activity, spatial clustering, candidate aggregation and evidence-based scoring.
 
 ---
 
-### Notebook 04: Population Displacement Detection
+## Notebook 03 — Residence Classification and Geographic Presence Estimation
+
+**File:** `03_residence_classification_and_geographic_presence.ipynb`
+
+### Objective
+
+Notebook 03 extends residential location inference by assessing the strength and consistency of the inferred residential evidence.
+
+Rather than treating every subscriber with a candidate residential location as a confirmed resident, the notebook introduces residence classifications that account for uncertainty and incomplete observations.
+
+### 4.15 Residence classification
+
+Subscribers are classified using the strength of their inferred nighttime residential evidence.
+
+The classification framework distinguishes between:
+
+- Likely stable resident.
+- Recurring presence that is not yet stable.
+- Uncertain or weak home presence.
+- Possible multiple residential areas.
+- Insufficient observations.
+- Insufficient residential location estimates.
+
+This approach is important because the absence of a reliable home estimate does not necessarily mean that a subscriber is absent from a geographic area.
+
+### 4.16 Evidence strength
+
+Residential evidence is grouped into broad strength categories.
+
+The classification considers:
+
+- Number of observations.
+- Number of nights with activity.
+- Consistency of recurring nighttime locations.
+- Relative concentration of observations.
+- Availability of a reliable residential estimate.
+
+The notebook uses rule-based evidence thresholds rather than treating the resulting confidence score as a calibrated probability.
+
+### 4.17 Geographic boundary integration
+
+The notebook integrates geographic administrative boundaries to associate inferred residential locations with administrative areas.
+
+The analysis uses geospatial processing to:
+
+- Load administrative boundary data.
+- Validate geographic coordinates.
+- Perform spatial joins.
+- Associate inferred residential locations with geographic areas.
+- Aggregate subscriber presence by administrative unit.
+
+The project uses Kenya administrative boundaries, including county-level geographic information.
+
+### 4.18 Geographic presence estimation
+
+The analysis aggregates inferred residential locations to estimate the distribution of subscribers across geographic areas.
+
+The synthetic analysis produced the following illustrative results at one stage:
+
+| Metric | Result |
+|---|---:|
+| Ordinary subscribers | 2,813 |
+| Subscribers with home estimates | 2,569 |
+| Home estimates generated | Approximately 91.3% |
+| DBSCAN-based estimates | 2,073 |
+| Alternative-method estimates | 496 |
+| Subscribers without estimates | 244 |
+
+The geographic assignment showed a strong concentration of inferred locations in Nairobi:
+
+| County | Inferred residential locations |
+|---|---:|
+| Nairobi | 2,264 |
+| Kiambu | 213 |
+| Machakos | 74 |
+| Kajiado | 18 |
+
+These results describe the synthetic dataset and its generation or coverage characteristics. They must not be interpreted as estimates of Kenya's real population distribution.
+
+### 4.19 Methodological considerations
+
+The notebook explicitly considers:
+
+- Insufficient observation coverage.
+- Multiple recurring nighttime locations.
+- Geographic boundary assignment.
+- Uncertain residential evidence.
+- Potential spatial filtering bias.
+- Differences between inferred residence and geographic presence.
+
+**Key outcome:** A residence classification and geographic aggregation framework that distinguishes strong evidence from uncertain or insufficient observations.
+
+---
+
+## Notebook 04 — Population Displacement Detection
 
 **File:** `04_population_displacement_detection.ipynb`
 
-This notebook investigates whether changes in nighttime mobile activity can provide signals of potential population movement.
+### Objective
 
-The analysis compares subscriber activity across baseline and follow-up periods.
+This notebook investigates whether changes in subscriber mobility patterns can be used to identify potential changes in residential location.
 
-#### Methodology
+The analytical motivation is to explore how MNO data could support population mobility monitoring and emergency response planning.
 
-**1. Establish baseline residential patterns**
+A change in inferred residential location may indicate relocation, but it does not independently establish that forced displacement has occurred.
 
-Use recurring nighttime activity during an initial observation period to estimate a baseline dominant location.
+### 4.20 Baseline residence estimation
 
-**2. Establish follow-up locations**
+The analysis first establishes a baseline residential location for each eligible subscriber.
 
-Infer dominant nighttime locations during a subsequent observation period.
+The baseline is used as a reference for subsequent observations.
 
-**3. Calculate geographic movement**
+The process considers:
 
-Use Haversine distance to calculate the distance between baseline and follow-up locations.
+- Baseline observation period.
+- Nighttime activity.
+- Minimum observation requirements.
+- Dominant geographic location.
+- Residential evidence consistency.
 
-**4. Identify potential movement**
+### 4.21 Follow-up location estimation
 
-Flag subscribers whose dominant observed nighttime location changes beyond an experimental geographic threshold.
+A follow-up period is used to examine whether subscriber activity shifts away from the baseline residential area.
 
-**5. Distinguish movement patterns**
+The analysis estimates dominant follow-up locations using the available geographic observations.
 
-Investigate whether the observed change is consistent with:
+### 4.22 Movement distance calculations
 
-- Temporary movement.
-- Recurring activity in another area.
-- A potentially persistent change in nighttime location.
-- Insufficient follow-up evidence.
+The Haversine formula is used to estimate geographic distance between baseline and follow-up locations.
 
-**6. Aggregate geographic movements**
+The analysis considers configurable movement thresholds to identify potentially meaningful geographic shifts.
 
-Analyse movement patterns using geographic zones and origin–destination summaries.
+### 4.23 Temporary movement versus potential relocation
 
-**7. Examine geographic concentration**
+Not every movement away from a baseline residential location represents a permanent change of residence.
 
-Investigate areas with relatively high observed inflows, outflows and changes in activity.
+The notebook therefore explores distinctions between:
 
-#### Important methodological distinction
+- Temporary mobility.
+- Recurring movement.
+- Persistent presence in a new geographic area.
+- Potential residential relocation.
+- Insufficient follow-up observations.
 
-A change in dominant nighttime location is not sufficient evidence of forced displacement.
+The methodology relies on repeated evidence rather than a single movement event.
 
-Other explanations include:
+### 4.24 Origin-destination analysis
 
-- Work-related travel.
-- Temporary visits.
-- Holidays.
-- Changes in network usage.
-- Changes in mobile network coverage.
-- Device sharing.
-- Incomplete observation.
-- Changes in subscriber activity.
+The notebook explores geographic movement between baseline and follow-up locations.
 
-The project therefore describes these outputs as potential movement or relocation-like signals rather than confirmed displacement events.
+The objective is to understand:
 
-#### Geographic aggregation
+- Where subscribers originate.
+- Where they subsequently appear.
+- Which geographic areas experience potential inflows.
+- Which geographic areas experience potential outflows.
+- Whether movement patterns are geographically concentrated.
 
-The notebook explores grid-based geographic aggregation to examine movement between areas.
+### 4.25 Geographic displacement patterns
 
-Different grid sizes and offsets are considered because geographic boundaries can influence origin–destination counts.
+The analysis investigates potential geographic hotspots and changes in activity distribution.
 
-Small groups may be suppressed to reduce disclosure risks. A minimum group-size threshold is an illustrative safeguard, not a complete privacy guarantee.
+This provides an exploratory foundation for identifying locations that may require additional investigation.
 
-#### Outputs
+### 4.26 Important limitations
 
-The notebook supports subscriber-level analytical investigation and aggregate geographic movement summaries.
+The available dataset covers only 28 days.
 
-Subscriber-level outputs must not be published.
+Consequently:
+
+- There is limited historical baseline information.
+- Seasonal mobility cannot be adequately assessed.
+- Short-term movement may be confused with longer-term relocation.
+- Forced displacement cannot be distinguished reliably from voluntary movement.
+- Empty origin-destination outputs may reflect minimum thresholds or sparse observations rather than an absence of movement.
+
+The outputs should therefore be described as potential relocation or displacement-related signals, not confirmed forced displacement.
+
+**Key outcome:** An exploratory framework for detecting changes in residential mobility patterns using baseline and follow-up observations.
 
 ---
 
-### Notebook 05: Validation, Sensitivity Analysis and Methodological Robustness
+## Notebook 05 — Validation, Sensitivity Analysis and Methodological Robustness
 
-**File:** `05_validation_and_sensitivity_analysis.ipynb`
+**File:** `05_validation_sensitivity_and_methodological_robustness.ipynb`
 
-This notebook evaluates the reliability and stability of the residential inference and movement methodologies.
+### Objective
 
-It addresses an important challenge in MNO analytics: residential ground truth is often unavailable, incomplete or expensive to collect.
+Notebook 05 evaluates the robustness of the residential inference methodology and examines how methodological choices affect the resulting estimates.
 
-Rather than relying on a single metric, the notebook examines temporal consistency, sensitivity to assumptions, method disagreement and uncertainty.
+A major challenge in MNO analytics is that independently verified residential ground truth is often unavailable.
 
-#### 1. Temporal holdout evaluation
+This notebook therefore explores validation methods that do not depend entirely on known residential labels.
 
-Split the observation period into:
+### 4.27 Temporal holdout validation
 
-| Period | Dates | Purpose |
-|---|---|---|
-| Baseline | 1–14 February 2026 | Infer dominant residential location |
-| Holdout | 15–28 February 2026 | Examine subsequent nighttime activity |
+The observation period is divided into separate baseline and holdout periods.
 
-Compare baseline inferred locations with follow-up dominant locations.
+| Period | Dates |
+|---|---|
+| Baseline | 1–14 February 2026 |
+| Holdout | 15–28 February 2026 |
 
-Evaluate geographic consistency at different distance thresholds, including 1 km, 2 km and 5 km.
+Residential locations are inferred using baseline observations and compared with dominant locations observed during the holdout period.
 
-This tests temporal stability, not verified residential accuracy.
+The analysis examines geographic consistency at different distance tolerances.
 
-#### 2. Nighttime-window sensitivity
+This evaluates temporal stability, not independently verified residential accuracy.
 
-Compare alternative nighttime definitions:
+### 4.28 Nighttime window sensitivity
 
-- 19:00–05:00
-- 20:00–06:00
-- 21:00–05:00
-- 22:00–06:00
+The notebook investigates whether alternative nighttime definitions change residential location estimates.
 
-Examine how changes in the observation window affect inferred locations and coverage.
+The tested windows include:
 
-#### 3. Minimum-observation sensitivity
+- 19:00–05:00.
+- 20:00–06:00.
+- 21:00–05:00.
+- 22:00–06:00.
 
-Evaluate alternative minimum observation requirements:
+The purpose is to understand how the choice of observation window affects candidate locations and inference stability.
 
-- 3 nights
-- 5 nights
-- 7 nights
-- 10 nights
+### 4.29 Parameter sensitivity analysis
 
-This helps establish the trade-off between estimate coverage and evidence strength.
+The methodology is evaluated across different parameter configurations.
 
-#### 4. Dominant-location threshold sensitivity
+Examples include:
 
-Evaluate alternative dominant-location thresholds:
+| Parameter | Tested values |
+|---|---|
+| Minimum observed nights | 3, 5, 7, 10 |
+| Dominant location share | 0.3, 0.4, 0.5, 0.6 |
+| Movement distance | 3, 5, 10, 15 km |
+| DBSCAN epsilon | 1 km demonstration setting |
+| Minimum DBSCAN samples | 2 demonstration setting |
 
-- 0.30
-- 0.40
-- 0.50
-- 0.60
+The analysis investigates how changing these parameters affects:
 
-Examine how the required proportion of activity at a candidate location affects inference results.
+- Number of estimated residences.
+- Number of uncertain subscribers.
+- Geographic stability.
+- Method agreement.
+- Potential movement classifications.
 
-#### 5. Movement threshold sensitivity
+### 4.30 Method comparison
 
-Compare geographic movement thresholds:
+The notebook compares DBSCAN-based spatial clustering with dominant-location aggregation.
 
-- 3 km
-- 5 km
-- 10 km
-- 15 km
+The objective is to understand where the methods agree and where their estimates differ.
 
-This helps distinguish small geographic variations from more substantial changes in observed nighttime location.
+Method disagreement is treated as useful diagnostic information rather than automatically assuming one method is correct.
 
-#### 6. Method disagreement
+### 4.31 Confidence and uncertainty assessment
 
-Compare residential estimates from:
+The analysis explores evidence-based confidence scores using factors such as:
 
-- DBSCAN spatial clustering.
-- Dominant-cell or dominant-location aggregation.
-
-Investigate where the methods agree or disagree and whether disagreement is associated with weaker evidence.
-
-#### 7. Confidence-score diagnostics
-
-Explore an evidence-based confidence score incorporating:
-
-- Dominant-location share.
+- Dominant location share.
 - Number of observed nights.
 - Number of active weeks.
+- Consistency of recurring activity.
 
-Compare the score against synthetic reference information where available.
+The resulting score is an evidence-strength indicator.
 
-A score should only be described as a probability if it has been appropriately calibrated and independently evaluated.
+It should not be interpreted as a probability of correctly identifying a subscriber's home unless it is calibrated against suitable independent reference data.
 
-#### 8. No-ground-truth validation
+### 4.32 No-ground-truth diagnostics
 
-Where verified home locations are unavailable, examine alternative diagnostics:
+The notebook examines analytical signals that can be used when verified residential labels are unavailable.
 
-- Temporal consistency.
-- Stability across parameter settings.
-- Agreement between independent methods.
+These include:
+
+- Temporal stability.
+- Parameter sensitivity.
+- Method agreement.
 - Geographic plausibility.
 - Observation coverage.
-- Confidence distributions.
-- Sensitivity to data filtering.
+- Distribution of confidence scores.
+- Proportion of subscribers without reliable estimates.
 
-These diagnostics do not replace independent ground-truth validation.
+### 4.33 Geographic grid sensitivity
 
-#### 9. Geographic grid alignment sensitivity
+The notebook investigates how geographic aggregation changes when grid size and grid alignment are modified.
 
-Investigate whether origin–destination summaries change when geographic grid boundaries are shifted.
+This is important because arbitrary grid boundaries can influence the number of subscribers assigned to geographic zones and the interpretation of movement patterns.
 
-This helps identify artificial movement patterns caused by arbitrary geographic partitioning.
+### 4.34 Validation limitations
 
-#### 10. Reproducibility
+Temporal consistency does not prove residential accuracy.
 
-The notebook reconstructs the analytical objects it needs rather than relying on variables created in previous notebook kernels.
+Similarly, agreement between two inference methods does not establish that either method is correct.
 
-This supports independent execution and reduces hidden dependencies between notebooks.
+The notebook therefore distinguishes:
+
+- Synthetic reference evaluation.
+- Temporal stability.
+- Sensitivity analysis.
+- Methodological consistency.
+- Independent real-world validation.
+
+**Key outcome:** A validation and robustness framework for understanding uncertainty, parameter dependence and the limitations of inference without ground truth.
 
 ---
 
-### Notebook 06: Poverty Estimation and Survey Data Integration
+## Notebook 06 — Poverty Estimation and Survey Data Integration
 
 **File:** `06_poverty_estimation_and_survey_data_integration.ipynb`
 
-This notebook explores whether aggregated MNO mobility indicators could complement traditional household survey data in poverty estimation.
+### Objective
 
-The underlying hypothesis is that patterns in mobile network activity may contain geographic information associated with economic activity, connectivity, population concentration and access to services.
+This notebook explores whether aggregated MNO activity features can be integrated with household survey information to support geographic poverty estimation.
 
-However, MNO activity is not a direct measurement of household income or consumption.
+The objective is not to claim that mobile network activity directly measures poverty.
 
-The analysis therefore treats poverty estimation as an exploratory research problem requiring survey integration and independent validation.
+Instead, the notebook investigates the analytical workflow required to combine geographic mobile activity indicators with socioeconomic survey outcomes.
 
-#### 1. Geographic aggregation
+### 4.35 Geographic aggregation
 
-Aggregate MNO activity into geographic grid zones.
+MNO observations are assigned to geographic grid zones.
 
-The notebook derives features such as:
+The analysis aggregates activity at the geographic level rather than linking individual subscribers to household records.
 
-- Number of unique subscribers.
+This creates an analytical foundation for combining MNO features with geographic survey outcomes.
+
+### 4.36 MNO feature engineering
+
+The notebook develops geographic activity indicators, including:
+
+- Unique subscribers per geographic zone.
 - Total network events.
-- Number of active cell IDs.
+- Number of observed cell sites.
 - Number of active days.
-- Nighttime activity.
-- Daytime activity.
+- Nighttime event counts.
+- Daytime event counts.
 - Weekend activity.
-- Nighttime activity ratio.
-- Weekend activity ratio.
+- Nighttime activity ratios.
+- Daytime activity ratios.
 - Mean events per subscriber.
 - Median events per subscriber.
-- Mean active days per subscriber.
+- Mean active days.
 - Events per cell.
 - Subscribers per cell.
 - Events per active day.
 
-These are aggregated geographic indicators, not direct household-level socioeconomic measurements.
+These variables provide different measures of network activity and geographic coverage.
 
-#### 2. Small-group suppression
+### 4.37 Geographic privacy and minimum-group suppression
 
-Zones with fewer than five unique subscribers are excluded from the main integrated analysis.
+Before geographic outputs are used in the survey integration workflow, the notebook applies a minimum subscriber threshold.
 
-This is an illustrative minimum-group threshold. It does not by itself provide differential privacy or guarantee protection against re-identification.
+The demonstration uses a minimum group size of five subscribers for relevant geographic aggregates.
 
-#### 3. Synthetic household survey generation
+This is intended to reduce the disclosure risk associated with very small geographic groups.
 
-Because verified household survey data and poverty labels are not available for this project, the notebook generates a synthetic survey dataset for pipeline testing.
+However, minimum-group suppression alone does not guarantee anonymity or prevent all disclosure attacks.
 
-The synthetic survey includes variables such as:
+### 4.38 Synthetic household survey generation
+
+Because verified household survey and poverty labels are not available in the synthetic MNO dataset, the notebook generates a separate synthetic household survey for testing the integration workflow.
+
+The generated variables include:
 
 - Household size.
 - Household consumption.
 - Electricity access.
 - Water access.
-- Sanitation.
+- Sanitation access.
 - Household assets.
-- Education.
+- Education indicators.
 - Housing characteristics.
+- Synthetic poverty classification.
 
-A synthetic poverty label is created using an illustrative monthly consumption threshold of 3,000 units.
+An illustrative monthly poverty threshold is used for the demonstration.
 
-This threshold is a demonstration parameter, not an official Kenyan poverty line.
+The threshold is not presented as an official Kenyan poverty line.
 
-#### 4. Geographic survey aggregation
+The synthetic survey is not a real household survey and is not derived from the MNO subscribers.
 
-Aggregate household survey indicators by geographic zone.
+### 4.39 Geographic survey aggregation
 
-The resulting indicators include:
+Survey outcomes are aggregated by geographic zone.
 
-- Poverty rate.
-- Mean household consumption.
+Examples include:
+
+- Number of surveyed households.
+- Average household consumption.
 - Median household consumption.
-- Household size.
-- Utility access.
-- Other socioeconomic characteristics.
+- Average household size.
+- Geographic poverty rate.
+- Access to electricity.
+- Access to water.
+- Sanitation indicators.
+- Household asset indicators.
 
-#### 5. MNO and survey integration
+### 4.40 MNO and survey integration
 
-Join MNO geographic features with survey indicators using the shared geographic zone.
+The aggregated MNO features are joined with aggregated survey outcomes using geographic zone identifiers.
 
-No subscriber identifier is linked to an individual household.
+The integration does not use subscriber-level identifiers to match individual subscribers to individual households.
 
-This is an ecological, geographic-level integration approach. It does not establish that individual subscribers correspond to surveyed households.
+This is important because the purpose is to explore geographic-level associations rather than individual-level household identification.
 
-#### 6. Poverty classification
+### 4.41 Poverty classification
 
-Develop a baseline classification workflow using aggregated MNO features.
+The notebook develops a baseline classification workflow to investigate whether aggregated MNO features can distinguish between geographic zones with different synthetic poverty outcomes.
 
-The modelling workflow includes:
+The analysis includes:
 
-- Random Forest classifier.
+- Random Forest classification.
 - Dummy classifier baseline.
-- Geographic group-based train/test separation.
+- Geographic train/test separation.
 - Precision.
 - Recall.
-- F1 score.
-- ROC-AUC, where the test data support its calculation.
+- F1-score.
+- ROC-AUC.
 - Average precision.
+- Feature importance analysis.
 
-#### 7. Household consumption estimation
+Geographic separation is used to reduce the risk of information leakage caused by placing observations from the same geographic zone in both training and testing data.
 
-Explore regression modelling to estimate aggregated consumption outcomes.
+### 4.42 Consumption prediction
 
-The workflow compares:
+A regression workflow is also explored to estimate synthetic household consumption outcomes at the geographic level.
 
-- Random Forest regression.
-- Dummy regression baseline.
+The analysis compares a Random Forest regressor with a dummy baseline.
 
 Evaluation metrics include:
 
@@ -763,120 +787,562 @@ Evaluation metrics include:
 - Root Mean Squared Error (RMSE).
 - R-squared.
 
-#### 8. Feature importance
+### 4.43 Geographic performance and representativeness
 
-Use permutation importance to examine which MNO indicators contribute most to model predictions.
+The notebook examines whether model performance differs across geographic areas and whether coverage limitations influence the results.
 
-Feature importance should be interpreted as model-specific evidence, not proof of a causal relationship between mobile activity and poverty.
+The analysis considers:
 
-#### 9. Geographic generalisation
+- Number of MNO observations per zone.
+- Number of surveyed households per zone.
+- Geographic representation.
+- Coverage differences.
+- Potential bias in the availability of mobile activity observations.
 
-Use geographic group-based splitting to avoid placing the same geographic zone in both training and testing sets.
+### 4.44 Critical interpretation
 
-This is important because MNO features are aggregated at zone level. Random household-level splitting can otherwise create overly optimistic evaluation results.
+The poverty estimation workflow is experimental.
 
-#### 10. Coverage and bias assessment
+Because both the survey outcomes and poverty labels are synthetic, the results cannot establish that MNO activity predicts real-world poverty.
 
-Examine how subscriber coverage, survey sample size and geographic representation vary across zones.
+The notebook demonstrates a geographic data integration and modelling pipeline that could be adapted to real household survey data after appropriate validation, sampling design considerations and poverty measurement calibration.
 
-The analysis investigates whether apparent model performance may be influenced by uneven network coverage or survey sampling.
-
-#### Important limitations
-
-The poverty estimation workflow is currently a synthetic proof of concept.
-
-- Survey records are simulated.
-- Poverty labels are simulated.
-- MNO activity is synthetic.
-- The relationship between synthetic survey outcomes and MNO activity is not independently established.
-- Results cannot be interpreted as real Kenyan poverty estimates.
-- The analysis does not establish that MNO data can reliably identify poor households.
-
-The purpose is to test the integration, modelling, validation and evaluation workflow before working with real household survey and MNO data.
+**Key outcome:** An experimental framework for combining aggregated MNO activity features with geographic household survey outcomes for poverty-related analysis.
 
 ---
 
-## 6. Methodological Principles
+## Notebook 07 — Scalability and Operator Implementation
 
-The project follows several principles throughout its analytical workflow.
+**File:** `07_scalability_and_operator_implementation.ipynb`
 
-### 6.1 Separate inference from evaluation
+### Objective
 
-Reference labels must not be used as inference features.
+Notebook 07 explores how the analytical methods developed in the preceding notebooks could be structured for implementation within an MNO's data environment.
 
-Synthetic labels may be used to evaluate an approach, but they must remain separate from the feature engineering and modelling process.
+The objective is to move beyond notebook-based analysis and demonstrate reusable data processing components, schema adaptation, batch processing, geographic aggregation and operator-oriented documentation.
 
-### 6.2 Distinguish absence of evidence from evidence of absence
+In a real MNO environment, analytical methods may need to run on operator infrastructure because of data confidentiality, security and data-sharing constraints.
 
-A subscriber with insufficient nighttime observations should not automatically be classified as absent from an area.
+### 4.45 Configurable data schema
 
-Similarly, no inferred home location does not necessarily indicate displacement.
+The notebook introduces a configurable schema adapter to map operator-specific field names to a canonical analytical schema.
 
-### 6.3 Account for temporal uncertainty
+This allows the processing workflow to accommodate differences in source field names and data structures.
 
-Residential and movement inference depend on observation windows.
+The canonical fields include:
 
-A short observation period may capture temporary behaviour rather than a stable residential pattern.
+- Subscriber identifier.
+- Event timestamp.
+- Cell identifier.
+- Latitude.
+- Longitude.
+- Data type.
+- Service category.
 
-### 6.4 Account for spatial uncertainty
+The schema adapter provides a foundation for adapting the same analytical workflow to different input formats.
 
-Cell tower coordinates are not exact subscriber locations.
+### 4.46 Data quality validation
 
-A subscriber connecting to a cell tower does not necessarily reside at the tower's coordinates.
+Reusable validation functions are developed to check:
 
-Spatial estimates should therefore be interpreted as approximate areas of presence rather than precise addresses.
+- Required columns.
+- Timestamp validity.
+- Geographic coordinate validity.
+- Missing identifiers.
+- Duplicate records.
+- Invalid observations.
+- Schema compatibility.
 
-### 6.5 Prioritise interpretable methods
+This helps identify problems before records enter the geographic aggregation workflow.
 
-The initial methodology uses transparent statistical and spatial techniques, including frequency aggregation, dominant-location analysis, Haversine distance and DBSCAN.
+### 4.47 Geographic grid assignment
 
-These methods provide a practical foundation for evaluating assumptions before introducing more complex modelling approaches.
+The notebook implements reusable geographic grid assignment to associate observations with geographic zones.
 
-### 6.6 Treat confidence as evidence strength
+This allows large event datasets to be aggregated spatially without requiring every analytical operation to be performed at the raw event level.
 
-Confidence scores are indicators of the strength of available evidence.
+### 4.48 Chunk-based processing
 
-They are not automatically calibrated probabilities of a subscriber's true residential location.
+The workflow processes the input CSV in configurable chunks rather than loading the entire dataset into memory.
 
-### 6.7 Validate geographic generalisation
+The demonstration uses a configurable chunk size of 100,000 records.
 
-When developing geographic prediction models, training and test data should be separated by geographic unit where appropriate.
+The processing pipeline:
 
-This reduces the risk of overstating performance through geographic leakage.
+1. Reads a chunk of MNO records.
+2. Applies schema standardisation.
+3. Validates the records.
+4. Processes timestamps and coordinates.
+5. Assigns geographic zones.
+6. Aggregates relevant activity.
+7. Writes intermediate aggregation results to SQLite.
+
+This provides a demonstration of how large event datasets can be processed incrementally.
+
+### 4.49 SQLite aggregation architecture
+
+The notebook creates a local SQLite database to store intermediate aggregation tables.
+
+The database structure includes:
+
+- `zone_events`
+- `subscriber_zone`
+- `subscriber_zone_day`
+- `zone_cell`
+- `zone_active_day`
+
+These tables support intermediate processing and the generation of geographic-level activity indicators.
+
+The database contains subscriber-level intermediate records and must therefore be treated as private working data.
+
+### 4.50 Geographic feature generation
+
+The notebook generates geographic activity indicators from the aggregated database.
+
+Examples include:
+
+- Unique subscribers.
+- Total events.
+- Number of observed cells.
+- Active days.
+- Nighttime activity.
+- Daytime activity.
+- Weekend activity.
+- Subscriber activity statistics.
+
+### 4.51 Minimum-group suppression
+
+Geographic aggregates are subjected to a minimum subscriber threshold before being included in the relevant outputs.
+
+The demonstration uses a configurable minimum group size of five subscribers.
+
+This is an illustrative disclosure-risk reduction measure, not a complete privacy guarantee.
+
+### 4.52 SQL implementation examples
+
+The notebook includes SQL-style aggregation examples to demonstrate how the analytical logic could be translated into database queries.
+
+The examples provide a starting point for implementation discussions with data engineers.
+
+They should be adapted and tested against the actual database engine and operator schema before production use.
+
+### 4.53 Operator configuration
+
+A configuration file is generated to document important processing parameters and expected input characteristics.
+
+This is intended to make the analytical workflow easier to adapt and reproduce.
+
+### 4.54 Basic tests and implementation checklist
+
+The notebook includes basic tests and an operator implementation checklist.
+
+The checklist covers areas such as:
+
+- Input schema validation.
+- Data quality.
+- Processing configuration.
+- Geographic aggregation.
+- Suppression.
+- Output generation.
+- Performance considerations.
+- Implementation review.
+
+### 4.55 Performance reporting
+
+The processing workflow records basic performance information to support an initial assessment of processing behaviour.
+
+These measurements are limited to the synthetic dataset and the local execution environment.
+
+They are not evidence of production performance at MNO scale.
+
+### 4.56 Handover documentation
+
+The notebook generates operator-oriented documentation and summaries intended to support implementation discussions.
+
+The outputs include:
+
+- Operator processing configuration.
+- Data quality summaries.
+- Processing performance reports.
+- Privacy-related suppression summaries.
+- Implementation checklist.
+- Handover summary.
+
+### 4.57 Implementation limitations
+
+The notebook demonstrates an operator-oriented prototype, not a production MNO deployment.
+
+Further work would be required to implement:
+
+- Distributed processing.
+- Production database integration.
+- Operator-specific data connectors.
+- Automated orchestration.
+- Monitoring and alerting.
+- Production access controls.
+- Comprehensive integration and regression testing.
+- Formal implementation acceptance criteria.
+
+**Key outcome:** A prototype architecture demonstrating how MNO analytical workflows could be adapted for chunk-based processing, database aggregation and operator-side implementation.
 
 ---
 
-## 7. Technology Stack
+## Notebook 08 — Privacy-Preserving MNO Analytics
 
-| Technology | Application |
+**File:** `08_privacy_preserving_mno_analytics.ipynb`
+
+### Objective
+
+Notebook 08 explores privacy-by-design approaches for processing and analysing MNO mobility records.
+
+MNO datasets may contain sensitive subscriber identifiers and detailed mobility information.
+
+The notebook investigates methods for reducing the amount of identifiable information used during analysis and explores privacy-enhancing technologies that may support secure collaboration and aggregate analytics.
+
+The objective is to demonstrate privacy-conscious analytical design rather than claim a production-ready privacy infrastructure.
+
+### 4.58 Data minimisation
+
+The notebook begins by selecting only the fields required for the analytical workflow.
+
+The minimised dataset retains relevant fields such as:
+
+- Subscriber identifier, temporarily required for pseudonymisation.
+- Timestamp.
+- Cell identifier.
+- Latitude.
+- Longitude.
+- Record type, where required.
+
+Unnecessary fields are excluded from the privacy-focused processing workflow.
+
+### 4.59 HMAC-SHA256 pseudonymisation
+
+The notebook demonstrates keyed pseudonymisation using HMAC-SHA256.
+
+A subscriber identifier is transformed into a deterministic pseudonymous token using a secret key.
+
+The implementation uses:
+
+- Python's `hmac` module.
+- SHA-256.
+- A secret key stored outside the notebook.
+- Environment-variable-based key loading.
+- A `.env` file for local development.
+
+The secret key is not intended to be committed to GitHub.
+
+The resulting token can support consistent subscriber-level aggregation without retaining the original direct identifier in the working analytical sample.
+
+**Security distinction:** HMAC pseudonymisation is not anonymisation. The key must remain confidential, and pseudonymous mobility records may still be sensitive or linkable.
+
+### 4.60 Geographic aggregation
+
+The notebook aggregates pseudonymised subscriber activity by geographic zone.
+
+The objective is to reduce reliance on raw subscriber-level records when generating geographic analytical outputs.
+
+The aggregation workflow includes:
+
+- Geographic grid assignment.
+- Subscriber-zone activity aggregation.
+- Event counts.
+- Nighttime activity.
+- Weekend activity.
+- Geographic subscriber counts.
+
+### 4.61 Event contribution limits
+
+The notebook demonstrates event contribution caps to limit the influence of highly active subscribers.
+
+A configurable event cap is applied in the demonstration.
+
+The purpose is to reduce disproportionate contributions from individual subscribers to aggregate geographic activity measures.
+
+The contribution limits are methodological parameters and would need to be evaluated and documented for a real deployment.
+
+### 4.62 Minimum-group suppression
+
+Geographic groups below the configured minimum subscriber threshold are suppressed.
+
+The demonstration uses a minimum group size of ten subscribers.
+
+This reduces the risk of releasing highly granular outputs that may expose information about very small groups.
+
+However, suppression alone does not guarantee anonymity and does not replace a formal privacy assessment.
+
+### 4.63 Differential privacy demonstration
+
+The notebook demonstrates the Laplace mechanism for adding noise to aggregate subscriber counts.
+
+For a count query with sensitivity \(\Delta f\), the Laplace mechanism adds noise sampled from:
+
+\[
+\operatorname{Laplace}\left(0,\frac{\Delta f}{\epsilon}\right)
+\]
+
+Where:
+
+- \(\epsilon\) is the privacy parameter.
+- \(\Delta f\) is the query's sensitivity.
+- Lower epsilon generally means stronger privacy and more noise.
+
+For the demonstration, the query is the number of distinct subscribers in each individual geographic zone.
+
+Each subscriber contributes at most one to that zone's count. Therefore, the sensitivity of an individual zone count is one under the add/remove-one-subscriber definition.
+
+The notebook uses a configurable epsilon value and compares exact aggregate counts with noisy counts.
+
+### 4.64 Differential privacy sensitivity analysis
+
+Different epsilon values are examined to understand the privacy-utility trade-off.
+
+The demonstration explores:
+
+- 0.1
+- 0.25
+- 0.5
+- 1
+- 2
+- 5
+
+The objective is to show how stronger privacy settings generally introduce more noise into the released statistics.
+
+**Important limitation:** The demonstration considers individual geographic count queries. A complete release involving multiple zones and multiple repeated queries requires appropriate privacy-budget accounting and composition analysis. The demonstration is not a complete formal differential privacy release system.
+
+### 4.65 Private Set Intersection (PSI)
+
+The notebook explores the concept of Private Set Intersection.
+
+PSI allows two parties to identify elements present in both datasets without directly exchanging their entire underlying datasets.
+
+The project includes:
+
+- A PSI problem definition.
+- A synthetic matching demonstration.
+- A conceptual PSI implementation design.
+- Implementation requirements for a secure protocol.
+
+The HMAC-based matching example is a functional matching baseline, not a secure PSI protocol. In particular, sharing the same HMAC key between parties does not provide the security guarantees of a properly implemented PSI system.
+
+### 4.66 Secure Multi-Party Computation (MPC)
+
+The notebook introduces additive secret sharing as an educational demonstration of how a value can be split into multiple shares.
+
+The individual shares do not independently reveal the original value under the assumptions of the demonstration.
+
+The notebook then illustrates how aggregate computation can be reconstructed from shares.
+
+This demonstrates the basic concept behind privacy-preserving computation across multiple parties.
+
+However, the demonstration runs within a single Python process. It is not a production secure MPC protocol and does not establish distributed security between independently controlled organisations.
+
+### 4.67 Homomorphic encryption
+
+The notebook explores Paillier homomorphic encryption using the `phe` Python library.
+
+The demonstration encrypts numerical values and performs an encrypted aggregation.
+
+This illustrates how certain computations can be performed on encrypted values without first decrypting each individual input.
+
+The implementation is educational and does not provide a complete production encryption architecture, key management system or security review.
+
+### 4.68 Privacy technology comparison
+
+The notebook compares several privacy-related approaches:
+
+| Technique | Purpose | Project implementation |
+|---|---|---|
+| Data minimisation | Reduce unnecessary data collection and processing | Demonstrated |
+| HMAC pseudonymisation | Replace direct identifiers with keyed tokens | Implemented |
+| Geographic aggregation | Reduce individual-level data exposure | Demonstrated |
+| Minimum-group suppression | Avoid releasing very small groups | Implemented |
+| Differential privacy | Add calibrated noise to aggregate outputs | Demonstrated |
+| Private Set Intersection | Support private set matching between parties | Conceptual design and non-secure matching baseline |
+| Secure Multi-Party Computation | Support computation across multiple parties | Educational additive secret-sharing demonstration |
+| Homomorphic encryption | Compute on encrypted values | Paillier encrypted-sum demonstration |
+
+### 4.69 Privacy risk assessment
+
+The notebook includes a privacy risk assessment and operator privacy checklist.
+
+The assessment considers risks associated with:
+
+- Direct subscriber identifiers.
+- Pseudonymous subscriber records.
+- Fine-grained geographic information.
+- Small geographic groups.
+- Secret-key exposure.
+- Repeated aggregate releases.
+- Data retention.
+- Unauthorised access.
+- Intermediate processing data.
+
+### 4.70 Privacy-safe outputs
+
+The notebook generates geographic aggregate outputs and privacy-related documentation.
+
+Subscriber-level intermediate data and secret keys must not be published.
+
+The generated outputs are subject to review before any public release.
+
+### 4.71 Privacy limitations
+
+The notebook does not constitute a formal privacy impact assessment or security audit.
+
+Additional work would be needed for:
+
+- Secure production PSI.
+- Distributed MPC.
+- Production key management.
+- Formal differential privacy accounting.
+- Privacy threat modelling.
+- Access control and audit logging.
+- Retention and deletion policies.
+- Independent security review.
+- Operator-specific legal and regulatory assessment.
+
+**Key outcome:** A privacy-focused analytical prototype demonstrating data minimisation, keyed pseudonymisation, aggregation, differential privacy and introductory privacy-enhancing technology concepts.
+
+---
+
+# 5. Technical Architecture
+
+The project follows a sequential analytical architecture.
+
+```text
+                    SYNTHETIC MNO DATA
+                  CDR / IPDR RECORDS
+                          |
+                          v
+          NOTEBOOK 01: DATA EXPLORATION
+             AND QUALITY ASSESSMENT
+                          |
+                          v
+          NOTEBOOK 02: RESIDENTIAL LOCATION
+                    INFERENCE
+                          |
+                          v
+          NOTEBOOK 03: RESIDENCE CLASSIFICATION
+              AND GEOGRAPHIC PRESENCE
+                          |
+                          v
+          NOTEBOOK 04: POPULATION DISPLACEMENT
+                       DETECTION
+                          |
+                          v
+          NOTEBOOK 05: VALIDATION AND
+             METHODOLOGICAL ROBUSTNESS
+                          |
+                          v
+          NOTEBOOK 06: POVERTY ESTIMATION
+               AND SURVEY INTEGRATION
+                          |
+                          v
+          NOTEBOOK 07: SCALABILITY AND
+              OPERATOR IMPLEMENTATION
+                          |
+                          v
+          NOTEBOOK 08: PRIVACY-PRESERVING
+                   MNO ANALYTICS
+                          |
+                          v
+             AGGREGATED ANALYTICAL OUTPUTS
+             DOCUMENTATION AND HANDOVER
+```
+
+The notebooks are modular and address different stages of the analytical workflow. Some later notebooks reconstruct their required inputs from stored outputs or raw records to support independent execution.
+
+---
+
+# 6. Repository Structure
+
+The intended repository structure is:
+
+```text
+mno-mobility-intelligence/
+│
+├── README.md
+├── LICENSE
+├── .gitignore
+├── .env.example
+├── requirements.txt
+│
+├── data/
+│   ├── raw/
+│   │   └── .gitkeep
+│   │
+│   ├── interim/
+│   │   └── .gitkeep
+│   │
+│   ├── processed/
+│   │   └── .gitkeep
+│   │
+│   └── synthetic/
+│       └── .gitkeep
+│
+├── notebooks/
+│   ├── 01_mno_data_exploration_and_quality_assessment.ipynb
+│   ├── 02_home_location_inference.ipynb
+│   ├── 03_residence_classification_and_geographic_presence.ipynb
+│   ├── 04_population_displacement_detection.ipynb
+│   ├── 05_validation_sensitivity_and_methodological_robustness.ipynb
+│   ├── 06_poverty_estimation_and_survey_data_integration.ipynb
+│   ├── 07_scalability_and_operator_implementation.ipynb
+│   └── 08_privacy_preserving_mno_analytics.ipynb
+│
+├── src/
+│   └── .gitkeep
+│
+├── sql/
+│   └── .gitkeep
+│
+├── docs/
+│   └── .gitkeep
+│
+├── reports/
+│   └── .gitkeep
+│
+├── dashboard/
+│   └── .gitkeep
+│
+└── tests/
+    └── .gitkeep
+```
+
+The structure may evolve as notebook functionality is refactored into reusable Python modules, SQL scripts, formal tests and documentation.
+
+Generated datasets, private intermediate files, database files and sensitive analytical outputs should remain outside the public repository.
+
+---
+
+# 7. Technology Stack
+
+The project uses Python and its data science ecosystem for data processing, geospatial analysis, statistical modelling, database operations and privacy demonstrations.
+
+| Category | Tools and libraries |
 |---|---|
-| Python | Main analytical programming language |
-| Pandas | Data manipulation and aggregation |
-| NumPy | Numerical computation |
-| Scikit-learn | Machine learning and model evaluation |
-| GeoPandas | Geographic data processing |
-| Shapely | Spatial geometry operations |
-| Matplotlib | Data visualisation |
-| Seaborn | Statistical visualisation |
-| SciPy | Statistical analysis |
-| Jupyter Notebook | Exploratory analysis and documentation |
-| Git | Version control |
-| GitHub | Source code management and project documentation |
-
-Additional tools and technologies may be introduced as the project develops.
+| Programming language | Python 3.11 |
+| Data manipulation | Pandas, NumPy |
+| Geospatial analysis | GeoPandas, Shapely |
+| Spatial clustering | Scikit-learn, DBSCAN |
+| Statistical analysis | SciPy, Scikit-learn |
+| Visualisation | Matplotlib, Seaborn |
+| Database | SQLite |
+| SQL | SQL aggregation and query examples |
+| Privacy | HMAC, SHA-256, differential privacy demonstration |
+| Homomorphic encryption | `phe` |
+| Environment management | Conda / Miniforge |
+| Notebook environment | Jupyter Notebook |
+| Version control | Git and GitHub |
+| Configuration | JSON, environment variables, `.env` |
+| Data processing | Chunk-based CSV processing |
 
 ---
 
-## 8. Installation and Environment Setup
+# 8. Environment Setup
 
-### Prerequisites
-
-- Python 3.11
-- Conda or Miniforge
-- Git
-- Jupyter Notebook or JupyterLab
-
-### Clone the repository
+### 8.1 Clone the repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/mno-mobility-intelligence.git
@@ -884,366 +1350,471 @@ git clone https://github.com/YOUR_USERNAME/mno-mobility-intelligence.git
 cd mno-mobility-intelligence
 ```
 
-Replace `YOUR_USERNAME` with the relevant GitHub username.
+Replace `YOUR_USERNAME` with the appropriate GitHub username.
 
-### Create the Conda environment
+### 8.2 Create a Conda environment
 
 ```bash
 conda create -n mno-mobility python=3.11 -y
-```
 
-Activate it:
-
-```bash
 conda activate mno-mobility
 ```
 
-### Install dependencies
+### 8.3 Install dependencies
+
+If a `requirements.txt` file is available:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-If the dependency file has not yet been finalised, install the core packages:
+Alternatively, install the principal packages:
 
 ```bash
-pip install pandas numpy scipy scikit-learn
-pip install matplotlib seaborn
-pip install geopandas shapely pyproj
-pip install jupyterlab notebook
+python -m pip install \
+pandas \
+numpy \
+matplotlib \
+seaborn \
+scikit-learn \
+scipy \
+geopandas \
+shapely \
+jupyter \
+python-dotenv \
+phe
 ```
 
-### Launch Jupyter
+### 8.4 Launch Jupyter Notebook
 
 ```bash
-jupyter lab
+jupyter notebook
 ```
 
-Open the notebooks directory and execute the notebooks in numerical order.
+Open the notebook directory and execute the notebooks in numerical order.
 
-### Data setup
+### 8.5 Data configuration
 
-Place the synthetic MNO dataset in:
+Place the synthetic source datasets in the appropriate local data directory.
+
+Expected input files include:
 
 ```text
-data/raw/
-```
+data/raw/MPD_sample_synthetic_ken_3000subs.csv
 
-The full dataset is expected at:
-
-```text
 data/raw/MPD_sample_synthetic_ken_3000subs_full.csv
 ```
 
-Place the external administrative boundary data in:
+The notebooks should be configured to use the appropriate project root and input paths.
+
+### 8.6 Privacy key configuration
+
+Notebook 08 uses a secret key for HMAC-SHA256 pseudonymisation.
+
+Create a local `.env` file in the project root:
 
 ```text
-data/external/
+MNO_PSEUDONYM_SECRET=YOUR_OWN_RANDOM_SECRET_KEY
 ```
 
-Check the relevant notebook configuration cells if your local file paths differ.
+Load it through `python-dotenv`:
+
+```python
+from dotenv import load_dotenv
+import os
+
+load_dotenv(PROJECT_ROOT / ".env")
+
+secret_key = os.getenv("MNO_PSEUDONYM_SECRET")
+```
+
+Generate a secure random key locally rather than using a hardcoded example.
+
+The `.env` file must be excluded from Git tracking.
+
+Never commit actual secret keys, credentials or environment-specific security information to GitHub.
 
 ---
 
-## 9. Reproducibility and Execution Order
+# 9. Key Methodological Principles
 
-The recommended execution order is:
+The project follows several important principles to reduce analytical errors and improve interpretability.
 
-| Order | Notebook | Purpose |
-|---:|---|---|
-| 1 | Notebook 01 | Data exploration and quality assessment |
-| 2 | Notebook 02 | Home location inference |
-| 3 | Notebook 03 | Residence classification |
-| 4 | Notebook 04 | Population displacement detection |
-| 5 | Notebook 05 | Validation and sensitivity analysis |
-| 6 | Notebook 06 | Poverty estimation and survey integration |
+### 9.1 Separate observed data from simulator-generated labels
 
-Each notebook should document its input files, configuration assumptions, processing steps and outputs.
+Simulator-generated labels must not be used as inference features.
 
-Where a notebook depends on a previous notebook's exported files, those dependencies should be explicitly documented.
+Where available, they may be used only for clearly identified synthetic reference evaluation.
 
-Notebook 05 also reconstructs key analytical objects needed for its experiments so that it does not depend solely on variables left in memory by Notebook 04.
+### 9.2 Distinguish residence from presence
 
-For reproducibility:
+A subscriber generating activity in a geographic area does not automatically establish that the subscriber resides there.
 
-- Fix random seeds where randomness is involved.
-- Record analytical parameter values.
-- Keep raw data separate from processed data.
-- Avoid manually changing intermediate outputs.
-- Clear notebook outputs before publishing.
-- Document changes to methodology and assumptions.
-- Record the software environment and dependency versions.
+Residence inference requires recurring evidence over a defined observation period.
 
----
+### 9.3 Treat insufficient evidence separately from absence
 
-## 10. Privacy, Confidentiality and Responsible Data Use
+A subscriber with insufficient observations should not automatically be classified as absent.
 
-Mobile network data can reveal sensitive information about people's daily routines, residential areas, movement and social behaviour.
+The methodology preserves uncertainty rather than forcing every subscriber into a binary residence or non-residence classification.
 
-Although the current project uses synthetic data, it is designed with privacy considerations that would be relevant to future real-world applications.
+### 9.4 Account for sparse and irregular observations
 
-### Current design considerations
+Network activity is not continuous GPS tracking.
 
-- Use pseudonymous subscriber identifiers.
-- Avoid unnecessary subscriber-level data exposure.
-- Aggregate observations geographically.
-- Suppress small groups in aggregate reporting.
-- Avoid publishing exact residential coordinates.
-- Separate reference labels from inference features.
-- Avoid treating inferred locations as verified identities or addresses.
-- Restrict access to raw and intermediate datasets.
-- Review exported outputs before publication.
+The methodology must account for differences in subscriber activity, event frequency, nighttime coverage and geographic observation density.
 
-### Future privacy-preserving work
+### 9.5 Avoid look-ahead leakage
 
-Potential future extensions include:
+Baseline observations must be separated from follow-up observations during temporal validation.
 
-**Differential privacy**
+Future information must not be used to construct historical residential estimates.
 
-Explore mechanisms for adding calibrated statistical noise to aggregate outputs, with explicit privacy budgets and documented utility trade-offs.
+### 9.6 Validate parameter choices
 
-**Private Set Intersection (PSI)**
+Spatial clustering, nighttime windows, observation thresholds and movement distances influence analytical outputs.
 
-Investigate how two parties could identify overlapping records without directly exchanging their underlying datasets.
+The project uses sensitivity analysis to understand how these decisions affect inference.
 
-**Secure Multi-Party Computation (MPC)**
+### 9.7 Avoid overstating confidence
 
-Explore workflows in which multiple parties jointly compute agreed outputs without exposing their raw inputs to one another.
+Rule-based evidence scores are not automatically calibrated probabilities.
 
-**Homomorphic encryption**
+Method agreement and temporal stability are useful diagnostics, but they do not prove that an inferred residence is correct.
 
-Investigate the feasibility and limitations of performing selected computations over encrypted data.
+### 9.8 Aggregate before sharing
 
-These are planned research and demonstration areas. They should not be interpreted as technologies already deployed in this project.
+Where possible, geographic analytical outputs should be generated from minimised and aggregated data.
+
+Subscriber-level mobility information must be treated as sensitive.
 
 ---
 
-## 11. Current Limitations
+# 10. Data Protection and Confidentiality
 
-The current project has several important limitations.
+MNO mobility data can reveal sensitive information about individuals, including recurring locations and movement patterns.
 
-### Data limitations
+The project therefore incorporates privacy considerations throughout its design.
 
-- Uses synthetic rather than real MNO records.
-- Limited to a 28-day observation period.
-- Does not contain independently verified residential ground truth.
-- Does not contain verified displacement labels.
-- Does not contain real household poverty labels.
-- Does not represent actual mobile network coverage or subscriber behaviour.
+Key practices include:
 
-### Methodological limitations
-
-- Nighttime activity is only a proxy for residential presence.
-- Cell tower coordinates are approximate indicators of network activity.
-- DBSCAN results depend on clustering parameters.
-- Dominant-location methods may be affected by highly active subscribers.
-- Confidence scores require further calibration.
-- Temporal consistency is not equivalent to residential accuracy.
-- Geographic grid boundaries can influence aggregate movement counts.
-- Short observation periods make it difficult to distinguish temporary travel from long-term relocation.
-- Synthetic poverty modelling cannot establish real-world predictive relationships.
-
-### Operational limitations
-
-The current work is an independent analytical prototype.
-
-It has not yet been deployed within a mobile network operator's production environment, independently audited by an MNO engineering team or validated through a live humanitarian intervention.
-
----
-
-## 12. Future Development Roadmap
-
-The project is intended to evolve from a notebook-based analytical prototype into a reusable MNO mobility intelligence framework.
-
-### Phase 1: Complete the analytical foundation
-
-- Finalise and document Notebooks 01–06.
-- Verify all analytical outputs.
-- Consolidate methodology and parameter assumptions.
-- Improve reproducibility.
-- Add automated data quality checks.
-- Review synthetic reference evaluation and geographic bias.
-
-### Phase 2: Modularise the analytical workflows
-
-Develop reusable Python modules for:
-
-- MNO data ingestion.
-- Data quality validation.
-- Timestamp and timezone handling.
-- Subscriber activity aggregation.
-- Home location inference.
-- Residence classification.
-- Geographic assignment.
-- Movement detection.
-- Origin–destination analysis.
-- Validation and reporting.
-
-### Phase 3: Scalability and operator implementation
-
-Develop a scalable implementation approach that can support larger datasets and different MNO data schemas.
-
-Potential areas include:
-
-- Efficient Pandas and PySpark processing.
-- SQL-based analytical workflows.
-- Configurable analytical parameters.
-- Multi-operator data schema adapters.
-- Incremental processing.
-- Performance benchmarking.
-- Reusable implementation templates.
-
-### Phase 4: Privacy-preserving analytics
-
-Develop demonstrations and technical documentation covering:
-
-- Pseudonymisation.
+- Data minimisation.
+- Keyed pseudonymisation.
+- Secret management outside notebooks.
 - Geographic aggregation.
-- Suppression.
-- Differential privacy.
-- Private Set Intersection.
-- Secure Multi-Party Computation.
-- Homomorphic encryption.
+- Minimum-group suppression.
+- Differential privacy demonstrations.
+- Exploration of PSI, MPC and homomorphic encryption.
+- Review of privacy risks associated with intermediate outputs.
 
-### Phase 5: Testing and technical review
+### Repository protection
 
-Develop:
+The following categories of files should not be committed to a public GitHub repository:
+
+```gitignore
+# Raw and processed data
+data/raw/
+data/interim/
+data/processed/
+data/synthetic/*.csv
+data/synthetic/*.parquet
+
+# Local secrets
+.env
+.env.*
+
+# Databases and local storage
+*.db
+*.sqlite
+*.sqlite3
+
+# Python environments
+.venv/
+venv/
+__pycache__/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Local system files
+.DS_Store
+
+# Generated analytical outputs
+reports/*.csv
+reports/*.parquet
+```
+
+If a secret or sensitive dataset has already been committed, adding it to `.gitignore` does not remove the existing Git history. The exposure must be addressed separately, including secret rotation where appropriate.
+
+---
+
+# 11. Key Outputs and Deliverables
+
+The eight notebooks generate analytical outputs and intermediate artefacts that support subsequent stages of the project.
+
+| Notebook | Main outputs |
+|---|---|
+| 01 | Data quality summaries, subscriber activity analysis, temporal and geographic diagnostics |
+| 02 | Home location estimates, subscriber classifications, nighttime candidates, cell coordinate validation |
+| 03 | Residence classifications, geographic presence summaries and administrative area assignments |
+| 04 | Baseline/follow-up movement analysis, potential relocation indicators and geographic movement summaries |
+| 05 | Temporal holdout results, parameter sensitivity results, method comparisons and robustness diagnostics |
+| 06 | Geographic MNO features, synthetic survey data, integrated zone-level dataset, poverty modelling and evaluation results |
+| 07 | SQLite aggregation database, processing reports, operator configuration, quality reports and handover documentation |
+| 08 | Privacy-safe geographic aggregates, differential privacy demonstrations, PSI/MPC design materials, privacy risk assessment and implementation checklist |
+
+These outputs are generated locally and should be reviewed before any public release.
+
+Not all intermediate outputs are suitable for public sharing, particularly those containing subscriber-level records or sensitive geographic information.
+
+---
+
+# 12. Project Limitations
+
+This project is a methodological research and implementation prototype based on synthetic MNO data.
+
+It is not a deployed MNO analytics system and does not claim validated performance on real subscriber records.
+
+The most important limitations are outlined below.
+
+### 12.1 Synthetic data
+
+The dataset is simulated and does not reproduce every characteristic of real operator data.
+
+Actual MNO records may differ in:
+
+- Network event frequency.
+- Cell-site density.
+- Subscriber activity.
+- Roaming behaviour.
+- Network architecture.
+- Cell handover behaviour.
+- Timestamp conventions.
+- Geographic precision.
+- Data availability and completeness.
+
+### 12.2 Limited observation period
+
+The dataset covers 28 days.
+
+This limits the ability to evaluate longer-term residential stability, seasonal migration, persistent displacement and changes in subscriber behaviour over extended periods.
+
+### 12.3 Lack of independent ground truth
+
+Simulator-generated reference labels are not equivalent to independently verified residential locations.
+
+Temporal stability and agreement between inference methods are useful diagnostics, but do not establish real-world residential accuracy.
+
+### 12.4 Cell-site location limitations
+
+A cell site's coordinates do not necessarily represent the precise geographic location of a subscriber when an event occurs.
+
+Real-world analysis may require additional network information, including sector identifiers, azimuth, coverage characteristics and network topology.
+
+### 12.5 Poverty estimation limitations
+
+The household survey and poverty labels used in Notebook 06 are synthetic.
+
+Consequently, the model results cannot be interpreted as evidence that MNO activity predicts actual household poverty.
+
+### 12.6 Scalability limitations
+
+Notebook 07 demonstrates chunk-based processing and local SQLite aggregation.
+
+It does not establish performance under production operator workloads or distributed processing environments.
+
+### 12.7 Privacy limitations
+
+Notebook 08 demonstrates selected privacy techniques but does not implement a complete secure multi-party analytics platform.
+
+HMAC pseudonymisation, suppression, differential privacy, PSI, MPC and homomorphic encryption have different security properties and should not be treated as interchangeable.
+
+Formal privacy accounting, secure protocol implementation, threat modelling and independent security review would be necessary before real-world deployment.
+
+---
+
+# 13. Future Development Roadmap
+
+The current project establishes an analytical foundation. Further development would focus on improving its methodological robustness, operational readiness and ability to adapt to different MNO environments.
+
+### 13.1 Reusable analytical method library
+
+Refactor notebook logic into reusable Python modules covering:
+
+- Data validation.
+- Temporal filtering.
+- Geographic processing.
+- Residential candidate generation.
+- Spatial clustering.
+- Residence classification.
+- Displacement detection.
+- Geographic aggregation.
+- Validation and sensitivity analysis.
+
+Introduce versioned configuration files to make parameter changes traceable and reproducible.
+
+### 13.2 Multi-operator schema adaptation
+
+Develop additional schema adapters to simulate different MNO data environments.
+
+Evaluate how different event structures, timestamp formats, cell identifiers and geographic precision affect inference.
+
+### 13.3 More extensive testing
+
+Expand the existing testing approach to include:
 
 - Unit tests.
 - Integration tests.
-- Data validation tests.
-- Geospatial calculation tests.
-- Time-window boundary tests.
-- SQL correctness tests.
-- Performance tests.
-- Code review exercises.
-- Technical implementation documentation.
+- Regression tests.
+- Edge-case tests.
+- SQL correctness checks.
+- Temporal leakage checks.
+- Geographic calculation tests.
+- Data quality acceptance tests.
 
-### Phase 6: Operational reporting and visualisation
+### 13.4 Operator implementation specifications
 
-Develop a dashboard to communicate aggregate insights, potentially including:
+Develop formal technical specifications containing:
 
-- Geographic subscriber coverage.
-- Residential presence patterns.
-- Residence classification distributions.
-- Potential population movement.
-- Geographic inflows and outflows.
-- Data quality and confidence indicators.
-- Coverage limitations and uncertainty.
+- Input and output schemas.
+- Data processing requirements.
+- Methodology and pseudocode.
+- Parameter definitions.
+- SQL examples.
+- Validation criteria.
+- Error handling.
+- Privacy requirements.
+- Performance expectations.
 
-All dashboard outputs should be aggregated and reviewed for privacy risks.
+### 13.5 Improved displacement analysis
 
-### Phase 7: Documentation and implementation guidance
+Extend the displacement workflow with longer baseline periods, multiple follow-up periods, seasonal movement considerations and external event timelines.
 
-Develop practical documentation for future MNO partnerships, including:
+### 13.6 Poverty estimation with real survey data
 
-- Technical discovery questionnaires.
-- Data requirements and schema documentation.
-- Data minimisation guidance.
-- Analytical implementation checklists.
-- Parameter selection guidance.
-- Data protection and privacy briefing materials.
-- Operator engineering handover documentation.
-- Training materials.
+Explore suitable publicly available household survey data, subject to licence and access conditions.
 
-These activities are proposed future work, not completed operator engagements.
+Evaluate the integration of MNO geographic features with properly weighted survey outcomes and independently measured socioeconomic indicators.
 
----
+### 13.7 Production-oriented processing
 
-## 13. Intended Applications
+Explore distributed processing technologies and database integrations that may be appropriate for larger MNO datasets.
 
-The methods explored in this project could support research and analytical applications such as:
+Potential areas include:
 
-- Population presence estimation.
-- Residential location inference.
-- Human mobility analysis.
-- Potential displacement monitoring.
-- Geographic population change analysis.
-- Humanitarian needs assessment.
-- Target-area population estimation.
-- Survey sampling and geographic representativeness analysis.
-- Poverty estimation research.
-- Evidence-based programme planning.
+- PySpark.
+- PostgreSQL/PostGIS.
+- Cloud-based batch processing.
+- Automated workflow orchestration.
+- Processing monitoring.
+- Data quality observability.
 
-Any operational application would require appropriate data governance, legal basis, independent validation, privacy safeguards and careful consideration of the potential consequences of incorrect estimates.
+### 13.8 Advanced privacy engineering
 
----
+Further develop the privacy component through:
 
-## 14. Key Research Questions
+- Formal differential privacy accounting.
+- Secure PSI implementations.
+- Distributed MPC protocols.
+- Production-grade homomorphic encryption workflows.
+- Privacy threat modelling.
+- Key lifecycle management.
+- Access control and audit logging.
+- Data retention and deletion policies.
 
-The project is designed to investigate several broader questions:
+### 13.9 Technical and non-technical training
 
-1. How accurately can residential areas be inferred from sparse and irregular CDR/IPDR observations?
-2. How does the choice of nighttime window affect residential inference?
-3. How should minimum observation thresholds be selected when ground truth is unavailable?
-4. How can spatial clustering and dominant-location approaches be combined?
-5. How can confidence scores be made interpretable and calibrated?
-6. How can temporary movement be distinguished from potentially persistent relocation?
-7. How sensitive are population movement estimates to geographic aggregation choices?
-8. How can MNO data be integrated with household survey data without linking individual subscribers to individual households?
-9. Can aggregated mobile activity indicators improve geographic poverty estimation?
-10. How can useful population-level insights be generated while minimising disclosure and re-identification risks?
+Develop training materials to explain:
+
+- How CDR and IPDR data work.
+- How residence inference is performed.
+- How geographic presence is interpreted.
+- How displacement signals should be evaluated.
+- What the data cannot reliably establish.
+- Why uncertainty and privacy matter.
 
 ---
 
-## 15. Project Status Summary
+# 14. Relevance to Humanitarian and Development Applications
+
+The project explores analytical methods that could potentially support humanitarian and development programmes.
+
+### Geographic targeting
+
+Residential location inference may help estimate whether subscribers are associated with a defined geographic target area over a specified observation period.
+
+### Emergency response
+
+Changes in mobility patterns may provide additional evidence for investigating population movement following an emergency.
+
+### Population mobility monitoring
+
+Aggregated mobility information may help describe movement patterns between geographic areas, subject to data quality, privacy and interpretation constraints.
+
+### Poverty research
+
+Geographic MNO activity features may be explored alongside independently collected household survey information to investigate potential relationships with socioeconomic conditions.
+
+### Evidence-based intervention design
+
+Understanding the strengths and limitations of MNO data can help programme teams determine which questions can reasonably be answered using mobility records.
+
+These are potential applications, not demonstrated real-world programme outcomes from this synthetic-data project.
+
+---
+
+# 15. Current Project Completion Status
 
 | Component | Status |
 |---|---|
-| Synthetic MNO data exploration | Developed |
-| Data quality assessment | Developed |
-| Subscriber activity analysis | Developed |
-| Cell coordinate validation | Developed |
-| Nighttime activity extraction | Developed |
-| Home location inference | Developed |
-| Spatial clustering | Developed |
-| Dominant-location fallback | Developed |
-| Residential confidence indicators | Developed |
-| Residence classification | Developed |
-| Geographic county assignment | Developed |
-| Population movement analysis | Developed / exploratory |
-| Origin–destination analysis | Developed / exploratory |
-| Temporal holdout validation | Implemented in Notebook 05 workflow |
-| Parameter sensitivity analysis | Implemented in Notebook 05 workflow |
-| Method disagreement analysis | Implemented in Notebook 05 workflow |
-| Confidence diagnostics | Implemented in Notebook 05 workflow |
-| Geographic grid sensitivity | Implemented in Notebook 05 workflow |
-| MNO and synthetic survey integration | Developed in Notebook 06 workflow |
-| Poverty classification experiment | Developed in Notebook 06 workflow |
-| Consumption regression experiment | Developed in Notebook 06 workflow |
-| Geographic model validation | Developed in Notebook 06 workflow |
-| Reusable Python package | Planned |
-| SQL implementation | Planned |
-| PySpark scalability | Planned |
-| Production operator integration | Not implemented |
-| Dashboard | Planned |
-| Automated testing framework | Planned |
-| Differential privacy implementation | Planned |
-| PSI/MPC/homomorphic encryption demonstrations | Planned |
-| Operator technical review and workshops | Planned |
-
-*Developed or implemented describes the analytical workflows and code prepared for the project. It does not imply that every experiment has been successfully executed, independently validated or deployed in production. Results should be reported only after reviewing actual notebook outputs.*
+| MNO data exploration and quality assessment | Completed prototype |
+| Residential location inference | Implemented |
+| Residence classification | Implemented |
+| Geographic presence estimation | Implemented |
+| Population displacement detection | Exploratory implementation |
+| Temporal validation | Implemented |
+| Sensitivity analysis | Implemented |
+| Poverty estimation and survey integration | Synthetic demonstration |
+| Chunk-based processing | Implemented prototype |
+| Operator schema configuration | Demonstrated |
+| SQLite aggregation | Implemented |
+| Operator implementation documentation | Initial prototype |
+| HMAC pseudonymisation | Implemented |
+| Geographic suppression | Implemented |
+| Differential privacy | Demonstration |
+| PSI | Conceptual design and non-secure matching baseline |
+| MPC | Educational demonstration |
+| Homomorphic encryption | Educational demonstration |
+| Production MNO deployment | Not implemented |
+| Independent real-world validation | Not performed |
+| Formal security review | Not performed |
 
 ---
 
-## 16. Conclusion
+# 16. Conclusion
 
-MNO Mobility Intelligence explores how mobile network records can be transformed into meaningful population-level insights through statistical modelling, geospatial analysis and careful treatment of uncertainty.
+The MNO Mobility Intelligence Project explores how mobile network records can be transformed into useful geographic and population-level insights through spatio-temporal analysis, statistical inference, geospatial processing and privacy-conscious data engineering.
 
-The work progresses from data quality assessment and residential location inference to residence classification, population movement analysis, methodological validation and exploratory poverty estimation.
+Across eight notebooks, the project progresses from understanding synthetic MNO records to inferring residential locations, classifying residence evidence, exploring potential population displacement, evaluating methodological robustness, integrating geographic activity with synthetic household survey data, designing operator-oriented processing workflows and demonstrating privacy-enhancing technologies.
 
-A central theme throughout the project is that mobile network activity provides an incomplete representation of human behaviour. Reliable analysis therefore requires more than building predictive models: it requires understanding data generation processes, identifying biases, validating assumptions, communicating uncertainty and protecting the people represented in the data.
+An important focus throughout the project is recognising the limitations of mobility data.
 
-Although the current implementation uses synthetic data, it provides a foundation for developing reusable, interpretable and privacy-conscious analytical methods that could be evaluated further with appropriately governed real-world MNO and household survey datasets.
+Network activity is not continuous location tracking. A cell-site observation does not necessarily identify a subscriber's precise location. Missing observations do not establish absence. A change in inferred location does not prove forced displacement. Geographic activity does not directly measure poverty.
+
+The methodology therefore places emphasis on evidence strength, uncertainty, temporal validation, sensitivity analysis, data minimisation and careful interpretation.
+
+The project is intended as a foundation for developing repeatable analytical methods that could be adapted and evaluated with real MNO datasets in collaboration with operators and relevant technical, privacy and programme stakeholders.
+
+**The ultimate objective is not simply to build a model that predicts where subscribers live, but to develop analytical methods that are explainable, testable, adaptable, privacy-conscious and practical to implement in real-world MNO environments.**
 
 ---
 
-## 17. Disclaimer
+## Disclaimer
 
-This is an independent research and portfolio project developed using synthetic MNO and synthetic household survey data.
+This is an independent research and portfolio project developed using synthetic MNO mobility data.
 
-It is not affiliated with, commissioned by or deployed for any mobile network operator, government agency or humanitarian organisation.
+It is not affiliated with, commissioned by or endorsed by any mobile network operator or humanitarian organisation.
 
-No actual subscriber residential locations, displacement events or household poverty estimates are established by this project.
+All subscriber identifiers and mobility observations are synthetic. No real subscriber-level mobility records are represented.
 
-All findings derived from the synthetic datasets are illustrative and should not be interpreted as real-world population statistics or operational recommendations.
+The results are methodological demonstrations and should not be used for operational targeting, beneficiary eligibility decisions, real-world poverty measurement or confirmed displacement classification without appropriate real-world validation, privacy review and operational testing.

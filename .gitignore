@@ -6,6 +6,7 @@ env/
 __pycache__/
 *.py[cod]
 *.egg-info/
+*.so
 
 # Jupyter temporary files
 .ipynb_checkpoints/
@@ -18,7 +19,13 @@ __pycache__/
 *.pem
 *.key
 credentials.json
+credentials/
 secrets/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
 
 # Raw MNO datasets
 data/raw/*
@@ -26,6 +33,7 @@ data/raw/*
 # Intermediate and processed subscriber-level data
 data/interim/*
 data/processed/*
+data/synthetic/*.xlsx
 
 # Synthetic source datasets and generated records
 data/synthetic/*.csv
@@ -54,8 +62,10 @@ reports/*.json
 
 # Temporary files
 .DS_Store
+Thumbs.db
 *.log
 *.tmp
+*.bak
 
 # IDE settings
 .vscode/
